@@ -50,7 +50,7 @@ export const selectListDataFiltered = state => {
             i.serverStatus.includes('Join')
         ).sort((a, b) => {
             const cmp = a.landscape.localeCompare(b.landscape)
-            if (cmp !== 0) return cmp
+            if (cmp !== 0) return -cmp
 
             const a_num = a.playerNum.includes('/') ? a.playerNum.split('/')[0] : a.playerNum
             const b_num = b.playerNum.includes('/') ? b.playerNum.split('/')[0] : b.playerNum
