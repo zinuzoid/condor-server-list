@@ -7,6 +7,7 @@ const slice = createSlice({
             loading: false,
             listData: [],
             requestLastTimeSpent: null,
+            requestLastTimestamp: null,
             errorMessage: null
         },
         reducers: {
@@ -17,12 +18,14 @@ const slice = createSlice({
             fetchListRequestError: (state, action) => {
                 state.loading = false
                 state.errorMessage = action.errorMessage
+                state.requestLastTimestamp = Date.now()
             },
             fetchListRequestSuccess: (state, action) => {
                 state.loading = false
                 state.errorMessage = null
                 state.listData = parseListHtml(action.html_body)
                 state.requestLastTimeSpent = action.time_spent
+                state.requestLastTimestamp = Date.now()
             }
         }
     }
@@ -40,8 +43,27 @@ export const selectListData = state => {
     return state.condorServerList.listData
 }
 
+export const selectListDataFiltered = state => {
+    return state.condorServerList.listData
+        .filter(i => i.isPrivate === 'No' &&
+            (i.landscape.includes('Slovenia') || i.landscape.includes('South East UK')) &&
+            i.serverStatus.includes('Join')
+        ).sort((a, b) => {
+            const cmp = a.landscape.localeCompare(b.landscape)
+            if (cmp !== 0) return cmp
+
+            const a_num = a.playerNum.includes('/') ? a.playerNum.split('/')[0] : a.playerNum
+            const b_num = b.playerNum.includes('/') ? b.playerNum.split('/')[0] : b.playerNum
+            return b_num - a_num
+        })
+}
+
 export const selectRequestLastTimeSpent = state => {
     return state.condorServerList.requestLastTimeSpent
+}
+
+export const selectRequestLastTimestamp = state => {
+    return state.condorServerList.requestLastTimestamp
 }
 
 export const {fetchList, fetchListRequestError, fetchListRequestSuccess} = slice.actions
