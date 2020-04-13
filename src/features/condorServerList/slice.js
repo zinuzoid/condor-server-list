@@ -8,7 +8,8 @@ const slice = createSlice({
             listData: [],
             requestLastTimeSpent: null,
             requestLastTimestamp: null,
-            errorMessage: null
+            errorMessage: null,
+            fetchInterval: 120000
         },
         reducers: {
             fetchList: state => {
@@ -17,15 +18,18 @@ const slice = createSlice({
             },
             fetchListRequestError: (state, action) => {
                 state.loading = false
-                state.errorMessage = action.errorMessage
+                state.errorMessage = action.payload.errorMessage
                 state.requestLastTimestamp = Date.now()
             },
             fetchListRequestSuccess: (state, action) => {
                 state.loading = false
                 state.errorMessage = null
-                state.listData = parseListHtml(action.html_body)
-                state.requestLastTimeSpent = action.time_spent
+                state.listData = parseListHtml(action.payload.html_body)
+                state.requestLastTimeSpent = action.payload.time_spent
                 state.requestLastTimestamp = Date.now()
+            },
+            updateFetchInterval: (state, action) => {
+                state.fetchInterval = action.payload.fetchInterval
             }
         }
     }
@@ -66,6 +70,10 @@ export const selectRequestLastTimestamp = state => {
     return state.condorServerList.requestLastTimestamp
 }
 
-export const {fetchList, fetchListRequestError, fetchListRequestSuccess} = slice.actions
+export const selectFetchInterval = state => {
+    return state.condorServerList.fetchInterval
+}
+
+export const {fetchList, fetchListRequestError, fetchListRequestSuccess, updateFetchInterval} = slice.actions
 
 export default slice.reducer

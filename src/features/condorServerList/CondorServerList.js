@@ -3,9 +3,12 @@ import {useSelector, useDispatch} from 'react-redux';
 import {
     selectLoading,
     fetchList,
+    updateFetchInterval,
     selectErrorMessage,
     selectRequestLastTimeSpent,
-    selectRequestLastTimestamp, selectListDataFiltered
+    selectRequestLastTimestamp,
+    selectListDataFiltered,
+    selectFetchInterval
 } from "./slice";
 import {MoonLoader} from "react-spinners";
 import Table, {Styles} from "./table";
@@ -14,13 +17,14 @@ import moment from "moment";
 export function CondorServerList() {
     const requestLastTimeSpent = useSelector(selectRequestLastTimeSpent);
     const requestLastTimestamp = useSelector(selectRequestLastTimestamp);
+    const fetchInterval = useSelector(selectFetchInterval);
     const dispatch = useDispatch();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     useEffect(onFetch, [])
     useEffect(() => {
             const timer = setTimeout(() => {
                 onFetch()
-            }, 60000)
+            }, fetchInterval)
             return () => clearTimeout(timer)
         }
         , [requestLastTimestamp])
@@ -47,8 +51,12 @@ export function CondorServerList() {
         },
     ], [])
 
-    function onFetch() {
+    function onFetch(_e) {
         dispatch(fetchList())
+    }
+
+    function onFetchIntervalInputChange(e) {
+        dispatch(updateFetchInterval({fetchInterval: e.target.value}))
     }
 
     return <div>
@@ -59,6 +67,7 @@ export function CondorServerList() {
         </span>
         {requestLastTimeSpent &&
         <p>{Math.round(requestLastTimeSpent)}ms / {moment(requestLastTimestamp).format('MMMM Do YYYY, h:mm:ss a')}</p>}
+        <input type="text" value={fetchInterval} onChange={onFetchIntervalInputChange}/>
         <button onClick={onFetch}>Fetch</button>
         <Styles>
             <Table columns={columns} data={useSelector(selectListDataFiltered)}/>
